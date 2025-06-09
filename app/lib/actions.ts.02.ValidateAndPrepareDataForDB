@@ -1,0 +1,28 @@
+'use server';
+
+import { z } from 'zod';
+
+const FormSchema = z.object({         //DM Zod data validation object
+  id: z.string(),
+  customerId: z.string(),
+  amount: z.coerce.number(),           //DM Change it from String to number
+  status: z.enum(['pending', 'paid']),
+  date: z.string(),
+});
+
+const CreateInvoice = FormSchema.omit({ id: true, date: true }); //DM id and date are omitted
+ 
+export async function createInvoice(formData: FormData) {
+  const { customerId, amount, status } = CreateInvoice.parse({  //DM validate and transform the data
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  });
+  const amountInCents = amount * 100;                  //DM Calculate the  amount in cents 
+  const date = new Date().toISOString().split('T')[0]; //DM Invoice date as YYYY-MM-DD
+  // Test it out:
+  console.log('customerId = ', customerId);
+  console.log('amount, cents = ', amountInCents);
+  console.log('status = ', status);
+  console.log('invoice date = ', date)
+}
